@@ -110,7 +110,7 @@ def collate_superv(data, max_len=None):
     X = torch.zeros(batch_size, max_len, features[0].shape[-1])  # (batch_size, padded_length, feat_dim)
     for i in range(batch_size):
         end = min(lengths[i], max_len)
-        X[i, :end, :] = features[i][:end, :]
+        X[i, :end] = features[i][:end]
 
     targets = torch.stack(labels, dim=0)  # (batch_size, num_labels)
 
