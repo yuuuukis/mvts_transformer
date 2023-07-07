@@ -424,6 +424,54 @@ class PMUData(BaseData):
 
         return all_df
 
+class ActigraphyData(BaseData):
+    """
+    Dataset class for ActigraphyData dataset.
+    Attributes:
+        all_df: dataframe indexed by ID, with multiple rows corresponding to the same index (sample).
+            Each row is a time step; Each column contains either metadata (e.g. timestamp) or a feature.
+        feature_df: contains the subset of columns of `all_df` which correspond to selected features
+        feature_names: names of columns contained in `feature_df` (same as feature_df.columns)
+        all_IDs: IDs contained in `all_df`/`feature_df` (same as all_df.index.unique() )
+        max_seq_len: maximum sequence (time series) length. If None, script argument `max_seq_len` will be used.
+            (Moreover, script argument overrides this attribute)
+    """
+
+    def __init__(self, root_dir=None, file_list=None, pattern=None, n_proc=1, limit_size=None, config=None):
+
+        self.set_num_processes(n_proc=n_proc)
+
+        df = pd.read_csv("D:/Users/yms5393/Downloads/train_processed_small_20230613.csv")
+        # grouped = df.groupby(['ID','VIDEO_FILENAME'],as_index=False, group_keys=False)
+        # size = grouped.size()
+        self.all_df = df
+        
+        self.max_seq_len = 2880
+        # self.feature_names = ['ID', 'VIDEO_FILENAME','EDA_Tonic', 'EDA_Phasic', 'SCR_Onsets', 'SCR_Peaks', 'SCR_Height', 'SCR_Recovery', 'ECG_Rate', 'PPG_Rate', 'RSP_Clean', 'RSP_Rate', 'RSP_Amplitude', 'RSP_RVT', 'EMG_Amplitude_zygo', 'EMG_Onsets_zygo', 'EMG_Offsets_zygo', 'EMG_Activity_zygo', 'EMG_Raw_zygo', 'EMG_Amplitude_coru', 'EMG_Onsets_coru', 'EMG_Offsets_coru', 'EMG_Activity_coru', 'EMG_Raw_coru', 'EMG_Amplitude_trap', 'EMG_Onsets_trap', 'EMG_Offsets_trap', 'EMG_Activity_trap', 'EMG_Raw_trap']
+        # self.feature_names = ['EDA_Phasic_entropy_401', 'EDA_Phasic_max_level_shift_401', 'EDA_Phasic_max_var_shift_401', 'EDA_Phasic_max_kl_shift_401', 'EDA_Phasic_hurst_401', 'EDA_Phasic_spike_401', 'EDA_Phasic_arch_acf_401', 'EDA_Phasic_garch_acf_401', 'EDA_Phasic_ARCH.LM_401', 'EDA_Phasic_std1st_der_401', 'EDA_Phasic_mean_401', 'EDA_Phasic_mean_lag20', 'EDA_Phasic_mean_lag40', 'EDA_Phasic_mean_lag60', 'EDA_Phasic_mean_lag80', 'EDA_Phasic_mean_lag100', 'EDA_Phasic_mean_lag120', 'EDA_Phasic_mean_lag140', 'EDA_Phasic_mean_lag160', 'EDA_Phasic_mean_lag180', 'EDA_Phasic_mean_lag200', 'ECG_Rate_entropy_401', 'ECG_Rate_max_level_shift_401', 'ECG_Rate_max_var_shift_401', 'ECG_Rate_max_kl_shift_401', 'ECG_Rate_hurst_401', 'ECG_Rate_spike_401', 'ECG_Rate_arch_acf_401', 'ECG_Rate_garch_acf_401', 'ECG_Rate_ARCH.LM_401', 'ECG_Rate_std1st_der_401', 'ECG_Rate_mean_401', 'ECG_Rate_mean_lag20', 'ECG_Rate_mean_lag40', 'ECG_Rate_mean_lag60', 'ECG_Rate_mean_lag80', 'ECG_Rate_mean_lag100', 'ECG_Rate_mean_lag120', 'ECG_Rate_mean_lag140', 'ECG_Rate_mean_lag160', 'ECG_Rate_mean_lag180', 'ECG_Rate_mean_lag200', 'PPG_Rate_entropy_401', 'PPG_Rate_max_level_shift_401', 'PPG_Rate_max_var_shift_401', 'PPG_Rate_max_kl_shift_401', 'PPG_Rate_hurst_401', 'PPG_Rate_spike_401', 'PPG_Rate_arch_acf_401', 'PPG_Rate_garch_acf_401', 'PPG_Rate_ARCH.LM_401', 'PPG_Rate_std1st_der_401', 'PPG_Rate_mean_401', 'PPG_Rate_mean_lag20', 'PPG_Rate_mean_lag40', 'PPG_Rate_mean_lag60', 'PPG_Rate_mean_lag80', 'PPG_Rate_mean_lag100', 'PPG_Rate_mean_lag120', 'PPG_Rate_mean_lag140', 'PPG_Rate_mean_lag160', 'PPG_Rate_mean_lag180', 'PPG_Rate_mean_lag200', 'EMG_Amplitude_trap_entropy_401', 'EMG_Amplitude_trap_max_level_shift_401', 'EMG_Amplitude_trap_max_var_shift_401', 'EMG_Amplitude_trap_max_kl_shift_401', 'EMG_Amplitude_trap_hurst_401', 'EMG_Amplitude_trap_spike_401', 'EMG_Amplitude_trap_arch_acf_401', 'EMG_Amplitude_trap_garch_acf_401', 'EMG_Amplitude_trap_ARCH.LM_401', 'EMG_Amplitude_trap_std1st_der_401', 'EMG_Amplitude_trap_mean_401', 'EMG_Amplitude_trap_mean_lag20', 'EMG_Amplitude_trap_mean_lag40', 'EMG_Amplitude_trap_mean_lag60', 'EMG_Amplitude_trap_mean_lag80', 'EMG_Amplitude_trap_mean_lag100', 'EMG_Amplitude_trap_mean_lag120', 'EMG_Amplitude_trap_mean_lag140', 'EMG_Amplitude_trap_mean_lag160', 'EMG_Amplitude_trap_mean_lag180', 'EMG_Amplitude_trap_mean_lag200', 'EMG_Amplitude_zygo_entropy_401', 'EMG_Amplitude_zygo_max_level_shift_401', 'EMG_Amplitude_zygo_max_var_shift_401', 'EMG_Amplitude_zygo_max_kl_shift_401', 'EMG_Amplitude_zygo_hurst_401', 'EMG_Amplitude_zygo_spike_401', 'EMG_Amplitude_zygo_arch_acf_401', 'EMG_Amplitude_zygo_garch_acf_401', 'EMG_Amplitude_zygo_ARCH.LM_401', 'EMG_Amplitude_zygo_std1st_der_401', 'EMG_Amplitude_zygo_mean_401', 'EMG_Amplitude_zygo_mean_lag20', 'EMG_Amplitude_zygo_mean_lag40', 'EMG_Amplitude_zygo_mean_lag60', 'EMG_Amplitude_zygo_mean_lag80', 'EMG_Amplitude_zygo_mean_lag100', 'EMG_Amplitude_zygo_mean_lag120', 'EMG_Amplitude_zygo_mean_lag140', 'EMG_Amplitude_zygo_mean_lag160', 'EMG_Amplitude_zygo_mean_lag180', 'EMG_Amplitude_zygo_mean_lag200', 'EMG_Amplitude_coru_entropy_401', 'EMG_Amplitude_coru_max_level_shift_401', 'EMG_Amplitude_coru_max_var_shift_401', 'EMG_Amplitude_coru_max_kl_shift_401', 'EMG_Amplitude_coru_hurst_401', 'EMG_Amplitude_coru_spike_401', 'EMG_Amplitude_coru_arch_acf_401', 'EMG_Amplitude_coru_garch_acf_401', 'EMG_Amplitude_coru_ARCH.LM_401', 'EMG_Amplitude_coru_std1st_der_401', 'EMG_Amplitude_coru_mean_401', 'EMG_Amplitude_coru_mean_lag20', 'EMG_Amplitude_coru_mean_lag40', 'EMG_Amplitude_coru_mean_lag60', 'EMG_Amplitude_coru_mean_lag80', 'EMG_Amplitude_coru_mean_lag100', 'EMG_Amplitude_coru_mean_lag120', 'EMG_Amplitude_coru_mean_lag140', 'EMG_Amplitude_coru_mean_lag160', 'EMG_Amplitude_coru_mean_lag180', 'EMG_Amplitude_coru_mean_lag200', 'EDA_Tonic', 'EDA_Phasic', 'SCR_Onsets', 'SCR_Peaks', 'SCR_Height', 'SCR_Recovery', 'ECG_Rate', 'PPG_Rate', 'RSP_Clean', 'RSP_Rate', 'RSP_Amplitude', 'RSP_RVT', 'EMG_Amplitude_zygo', 'EMG_Onsets_zygo', 'EMG_Offsets_zygo', 'EMG_Activity_zygo', 'EMG_Raw_zygo', 'EMG_Amplitude_coru', 'EMG_Onsets_coru', 'EMG_Offsets_coru', 'EMG_Activity_coru', 'EMG_Raw_coru', 'EMG_Amplitude_trap', 'EMG_Onsets_trap', 'EMG_Offsets_trap', 'EMG_Activity_trap', 'EMG_Raw_trap','ID', 'VIDEO_FILENAME']
+        # self.feature_names = ['ID', 'VIDEO_FILENAME','EDA_Phasic_entropy_401', 'EDA_Phasic_max_level_shift_401', 'EDA_Phasic_max_var_shift_401', 'EDA_Phasic_max_kl_shift_401', 'EDA_Phasic_hurst_401', 'EDA_Phasic_spike_401', 'EDA_Phasic_arch_acf_401', 'EDA_Phasic_garch_acf_401', 'EDA_Phasic_ARCH.LM_401', 'EDA_Phasic_std1st_der_401', 'EDA_Phasic_mean_401', 'EDA_Phasic_mean_lag20', 'EDA_Phasic_mean_lag40', 'EDA_Phasic_mean_lag60', 'EDA_Phasic_mean_lag80', 'EDA_Phasic_mean_lag100', 'EDA_Phasic_mean_lag120', 'EDA_Phasic_mean_lag140', 'EDA_Phasic_mean_lag160', 'EDA_Phasic_mean_lag180', 'EDA_Phasic_mean_lag200', 'ECG_Rate_entropy_401', 'ECG_Rate_max_level_shift_401', 'ECG_Rate_max_var_shift_401', 'ECG_Rate_max_kl_shift_401', 'ECG_Rate_hurst_401', 'ECG_Rate_spike_401', 'ECG_Rate_arch_acf_401', 'ECG_Rate_garch_acf_401', 'ECG_Rate_ARCH.LM_401', 'ECG_Rate_std1st_der_401', 'ECG_Rate_mean_401', 'ECG_Rate_mean_lag20', 'ECG_Rate_mean_lag40', 'ECG_Rate_mean_lag60', 'ECG_Rate_mean_lag80', 'ECG_Rate_mean_lag100', 'ECG_Rate_mean_lag120', 'ECG_Rate_mean_lag140', 'ECG_Rate_mean_lag160', 'ECG_Rate_mean_lag180', 'ECG_Rate_mean_lag200', 'PPG_Rate_entropy_401', 'PPG_Rate_max_level_shift_401', 'PPG_Rate_max_var_shift_401', 'PPG_Rate_max_kl_shift_401', 'PPG_Rate_hurst_401', 'PPG_Rate_spike_401', 'PPG_Rate_arch_acf_401', 'PPG_Rate_garch_acf_401', 'PPG_Rate_ARCH.LM_401', 'PPG_Rate_std1st_der_401', 'PPG_Rate_mean_401', 'PPG_Rate_mean_lag20', 'PPG_Rate_mean_lag40', 'PPG_Rate_mean_lag60', 'PPG_Rate_mean_lag80', 'PPG_Rate_mean_lag100', 'PPG_Rate_mean_lag120', 'PPG_Rate_mean_lag140', 'PPG_Rate_mean_lag160', 'PPG_Rate_mean_lag180', 'PPG_Rate_mean_lag200', 'EMG_Amplitude_trap_entropy_401', 'EMG_Amplitude_trap_max_level_shift_401', 'EMG_Amplitude_trap_max_var_shift_401', 'EMG_Amplitude_trap_max_kl_shift_401', 'EMG_Amplitude_trap_hurst_401', 'EMG_Amplitude_trap_spike_401', 'EMG_Amplitude_trap_arch_acf_401', 'EMG_Amplitude_trap_garch_acf_401', 'EMG_Amplitude_trap_ARCH.LM_401', 'EMG_Amplitude_trap_std1st_der_401', 'EMG_Amplitude_trap_mean_401', 'EMG_Amplitude_trap_mean_lag20', 'EMG_Amplitude_trap_mean_lag40', 'EMG_Amplitude_trap_mean_lag60', 'EMG_Amplitude_trap_mean_lag80', 'EMG_Amplitude_trap_mean_lag100', 'EMG_Amplitude_trap_mean_lag120', 'EMG_Amplitude_trap_mean_lag140', 'EMG_Amplitude_trap_mean_lag160', 'EMG_Amplitude_trap_mean_lag180', 'EMG_Amplitude_trap_mean_lag200', 'EMG_Amplitude_zygo_entropy_401', 'EMG_Amplitude_zygo_max_level_shift_401', 'EMG_Amplitude_zygo_max_var_shift_401', 'EMG_Amplitude_zygo_max_kl_shift_401', 'EMG_Amplitude_zygo_hurst_401', 'EMG_Amplitude_zygo_spike_401', 'EMG_Amplitude_zygo_arch_acf_401', 'EMG_Amplitude_zygo_garch_acf_401', 'EMG_Amplitude_zygo_ARCH.LM_401', 'EMG_Amplitude_zygo_std1st_der_401', 'EMG_Amplitude_zygo_mean_401', 'EMG_Amplitude_zygo_mean_lag20', 'EMG_Amplitude_zygo_mean_lag40', 'EMG_Amplitude_zygo_mean_lag60', 'EMG_Amplitude_zygo_mean_lag80', 'EMG_Amplitude_zygo_mean_lag100', 'EMG_Amplitude_zygo_mean_lag120', 'EMG_Amplitude_zygo_mean_lag140', 'EMG_Amplitude_zygo_mean_lag160', 'EMG_Amplitude_zygo_mean_lag180', 'EMG_Amplitude_zygo_mean_lag200', 'EMG_Amplitude_coru_entropy_401', 'EMG_Amplitude_coru_max_level_shift_401', 'EMG_Amplitude_coru_max_var_shift_401', 'EMG_Amplitude_coru_max_kl_shift_401', 'EMG_Amplitude_coru_hurst_401', 'EMG_Amplitude_coru_spike_401', 'EMG_Amplitude_coru_arch_acf_401', 'EMG_Amplitude_coru_garch_acf_401', 'EMG_Amplitude_coru_ARCH.LM_401', 'EMG_Amplitude_coru_std1st_der_401', 'EMG_Amplitude_coru_mean_401', 'EMG_Amplitude_coru_mean_lag20', 'EMG_Amplitude_coru_mean_lag40', 'EMG_Amplitude_coru_mean_lag60', 'EMG_Amplitude_coru_mean_lag80', 'EMG_Amplitude_coru_mean_lag100', 'EMG_Amplitude_coru_mean_lag120', 'EMG_Amplitude_coru_mean_lag140', 'EMG_Amplitude_coru_mean_lag160', 'EMG_Amplitude_coru_mean_lag180', 'EMG_Amplitude_coru_mean_lag200']
+
+        self.feature_names = ['Activity', 'White_Light', 'Red_Light', 'Green_Light', 'Blue_Light']
+        # self.feature_names = ['Activity', 'Activity', 'Activity']
+
+        self.feature_df = self.all_df[self.feature_names].astype(np.float32)
+        # labels = self.all_df[['Label_final']]
+        # self.feature_df.columns = self.feature_df.columns.astype(str)
+        
+        # self.labels_df = self.all_df[['valence','arousal']]
+        
+        self.labels_df = self.all_df[['Label_final']].astype(np.int64)
+
+        # labels = pd.Series(labels, dtype="category")
+        # self.class_names = labels.cat.categories
+        # self.labels_df = pd.DataFrame(labels.cat.codes, dtype=np.int8)
+
+        # self.labels_df = self.all_df[['Label_final']]
+        self.class_names = pd.Index([0,1])
+        self.all_df.set_index('id')
+        self.all_IDs = self.all_df.index.unique()
+
+
     @staticmethod
     def load_single(filepath):
         df = PMUData.read_data(filepath)
@@ -445,4 +493,4 @@ class PMUData(BaseData):
 
 data_factory = {'weld': WeldData,
                 'tsra': TSRegressionArchive,
-                'pmu': PMUData}
+                'pmu': PMUData, 'actigraphy': ActigraphyData,}

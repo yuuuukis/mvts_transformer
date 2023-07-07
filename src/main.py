@@ -33,6 +33,7 @@ from datasets.datasplit import split_dataset
 from models.ts_transformer import model_factory
 from models.loss import get_loss_module
 from optimizers import get_optimizer
+import numpy as np
 
 
 def main(config):
@@ -193,7 +194,10 @@ def main(config):
                                  collate_fn=lambda x: collate_fn(x, max_len=model.max_len))
         test_evaluator = runner_class(model, test_loader, device, loss_module,
                                             print_interval=config['print_interval'], console=config['console'])
-        aggr_metrics_test, per_batch_test = test_evaluator.evaluate(keep_all=True)
+        with torch.no_grad():
+            aggr_metrics_test, per_batch_test = test_evaluator.evaluate(keep_all=True)
+            pred_filepath = os.path.join(config['pred_dir'], 'best_predictions')
+            np.savez(pred_filepath, **per_batch_test)
         print_str = 'Test Summary: '
         for k, v in aggr_metrics_test.items():
             print_str += '{}: {:8f} | '.format(k, v)

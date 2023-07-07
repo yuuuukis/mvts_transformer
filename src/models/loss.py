@@ -35,7 +35,7 @@ class NoFussCrossEntropyLoss(nn.CrossEntropyLoss):
     """
 
     def forward(self, inp, target):
-        return F.cross_entropy(inp, target.long().squeeze(), weight=self.weight,
+        return F.cross_entropy(inp, target.long().squeeze(dim=1), weight=self.weight,
                                ignore_index=self.ignore_index, reduction=self.reduction)
 
 
