@@ -198,7 +198,6 @@ def main(config):
             aggr_metrics_test, per_batch_test = test_evaluator.evaluate(keep_all=True)
             pred_filepath = os.path.join(config['pred_dir'], 'best_predictions')
             np.savez(pred_filepath, **per_batch_test)
-        
         print_str = 'Test Summary: '
 
         for k, v in aggr_metrics_test.items():
